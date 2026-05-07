@@ -72,6 +72,37 @@
   }
   .subnav-title .dot { color: var(--azure); }
   .subnav-actions { display: flex; gap: 8px; align-items: center; }
+  .rate-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--silver-mist);
+    border-radius: var(--r-pill);
+    padding: 4px 12px;
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--slate);
+    letter-spacing: -0.003em;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s;
+  }
+  .rate-chip:hover { background: #dcdce0; }
+  .rate-chip .rate-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #00a854;
+    flex-shrink: 0;
+  }
+  .rate-chip.manual .rate-dot { background: #b64400; }
+  .rate-chip.loading .rate-dot { background: #888; animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .rate-chip strong { color: var(--ink); font-weight: 500; }
+  @media (max-width: 540px) {
+    .rate-chip { display: none; }
+  }
   .ghost-link {
     background: transparent;
     border: none;
@@ -274,6 +305,77 @@
     font-weight: 400;
   }
 
+  /* ---------- Rate Modal ---------- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-backdrop.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--snow);
+    border-radius: var(--r-card);
+    padding: 32px;
+    max-width: 460px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.36px;
+    margin: 0 0 8px;
+  }
+  .modal-sub {
+    font-size: 14px;
+    color: var(--graphite);
+    margin: 0 0 24px;
+    letter-spacing: -0.04px;
+  }
+  .rate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--silver-mist);
+  }
+  .rate-row:last-of-type { border-bottom: none; }
+  .rate-row-label {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.006em;
+  }
+  .rate-row-value {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+  }
+  .rate-row-meta {
+    font-size: 12px;
+    color: var(--graphite);
+    margin-top: 4px;
+    text-align: right;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    justify-content: flex-end;
+  }
+
   /* ---------- Form ---------- */
   .form-card {
     background: var(--snow);
@@ -325,6 +427,15 @@
     appearance: none;
     -webkit-appearance: none;
     transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .price-group {
+    display: grid;
+    grid-template-columns: 1fr 96px;
+    gap: 8px;
+  }
+  .price-group select {
+    padding-right: 28px !important;
+    background-position: right 8px center !important;
   }
   .field select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23474747' stroke-width='1.5' stroke-linecap='round' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
@@ -427,6 +538,14 @@
   .card-price-line .amount {
     font-weight: 500;
     color: var(--ink);
+  }
+  .card-price-line .original {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--graphite);
+    letter-spacing: -0.003em;
+    margin-top: 2px;
   }
   .card-meta {
     display: flex;
@@ -537,6 +656,10 @@
   <div class="subnav-inner">
     <div class="subnav-title">Subscriptions<span class="dot">.</span></div>
     <div class="subnav-actions">
+      <button class="rate-chip loading" id="btn-rate" title="為替レート設定">
+        <span class="rate-dot"></span>
+        <span>1 USD = <strong id="rate-display">—</strong></span>
+      </button>
       <button class="ghost-link" id="btn-export">エクスポート</button>
       <button class="ghost-link" id="btn-import">インポート</button>
       <input type="file" id="import-file" accept="application/json" style="display:none">
@@ -593,8 +716,14 @@
           <input type="text" id="f-name" placeholder="Netflix">
         </div>
         <div class="field">
-          <label for="f-price">料金 (円)<span class="req">*</span></label>
-          <input type="number" id="f-price" min="0" step="1" placeholder="1490">
+          <label for="f-price">料金<span class="req">*</span></label>
+          <div class="price-group">
+            <input type="number" id="f-price" min="0" step="0.01" placeholder="1490">
+            <select id="f-currency">
+              <option value="JPY">JPY ¥</option>
+              <option value="USD">USD $</option>
+            </select>
+          </div>
         </div>
         <div class="field">
           <label for="f-cycle">請求サイクル</label>
@@ -664,11 +793,39 @@
   </footer>
 </main>
 
+<div class="modal-backdrop" id="rate-modal">
+  <div class="modal">
+    <h3 class="modal-title">為替レート</h3>
+    <p class="modal-sub">USDで登録したサブスクの円換算に使われます。レートは自動で取得されます。</p>
+
+    <div class="rate-row">
+      <div>
+        <div class="rate-row-label">1 USD</div>
+        <div class="rate-row-meta" id="rate-updated">—</div>
+      </div>
+      <div class="rate-row-value">¥<span id="rate-current">—</span></div>
+    </div>
+
+    <div id="rate-error" style="display:none; margin-top:16px; padding:12px 14px; background:#fcebeb; border-radius:10px; color:#a32d2d; font-size:14px; line-height:1.5;">
+      <strong>レート取得に失敗しました</strong><br>
+      <span style="color:#5f1f1f;">ネットワーク接続を確認して、もう一度お試しください。前回取得したレートで暫定的に計算しています。</span>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-rate-refresh" type="button">最新を取得</button>
+      <button class="btn-primary" id="btn-rate-close" type="button">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   'use strict';
 
   const STORAGE_KEY = 'subscription_manager_v1';
+  const RATE_KEY = 'subscription_manager_rate_v1';
+  const RATE_API = 'https://open.er-api.com/v6/latest/USD';
+  const CACHE_HOURS = 24;
   const KNOWN_CANCEL_URLS = {
     'netflix': 'https://www.netflix.com/cancelplan',
     'spotify': 'https://www.spotify.com/account/subscription/',
@@ -717,6 +874,8 @@
 
   let data = [];
   let editingId = null;
+  // rate state: auto-only. lastError is set when fetch fails.
+  let rateState = { rate: null, fetchedAt: null, lastError: null };
 
   // ---------- Storage ----------
   function loadData() {
@@ -730,6 +889,89 @@
     catch (e) { alert('保存に失敗しました: ' + e.message); }
   }
 
+  function loadRate() {
+    try {
+      const raw = localStorage.getItem(RATE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.rate) rateState.rate = parsed.rate;
+        if (parsed.fetchedAt) rateState.fetchedAt = parsed.fetchedAt;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  function saveRate() {
+    try {
+      localStorage.setItem(RATE_KEY, JSON.stringify({
+        rate: rateState.rate,
+        fetchedAt: rateState.fetchedAt
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function effectiveRate() {
+    return Number(rateState.rate) || 0;
+  }
+  function hasRate() {
+    return rateState.rate && rateState.rate > 0;
+  }
+
+  async function fetchRate(force) {
+    // Skip if cached and fresh, unless forced
+    if (!force && hasRate() && rateState.fetchedAt) {
+      const ageHours = (Date.now() - rateState.fetchedAt) / 3600000;
+      if (ageHours < CACHE_HOURS) return rateState.rate;
+    }
+    setRateChip('loading');
+    try {
+      const res = await fetch(RATE_API);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      const jpy = json && json.rates && json.rates.JPY;
+      if (!jpy || typeof jpy !== 'number') throw new Error('JPY rate missing');
+      rateState.rate = jpy;
+      rateState.fetchedAt = Date.now();
+      rateState.lastError = null;
+      saveRate();
+      return jpy;
+    } catch (e) {
+      console.warn('Rate fetch failed:', e);
+      rateState.lastError = e.message || 'fetch failed';
+      return null;
+    }
+  }
+
+  function setRateChip(state) {
+    const chip = document.getElementById('btn-rate');
+    chip.classList.remove('loading', 'manual');
+    const rateEl = document.getElementById('rate-display');
+    if (state === 'loading') {
+      chip.classList.add('loading');
+      rateEl.textContent = '取得中…';
+    } else if (state === 'error') {
+      chip.classList.add('manual');
+      if (hasRate()) {
+        rateEl.textContent = '¥' + effectiveRate().toFixed(2) + ' (旧)';
+      } else {
+        rateEl.textContent = '取得失敗';
+      }
+    } else {
+      // ok
+      rateEl.textContent = '¥' + effectiveRate().toFixed(2);
+    }
+  }
+
+  function fmtRelativeTime(ts) {
+    if (!ts) return '未取得';
+    const diff = Date.now() - ts;
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'たった今';
+    if (m < 60) return m + '分前';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + '時間前';
+    const d = Math.floor(h / 24);
+    return d + '日前';
+  }
+
   // ---------- Helpers ----------
   function fmt(n) { return Math.round(n).toLocaleString('ja-JP'); }
   function escape(s) {
@@ -737,11 +979,17 @@
       {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
     ));
   }
+  // Always returns JPY-equivalent monthly amount.
+  // If USD and rate unavailable, returns 0 (UI will show warning).
   function monthly(s) {
     const p = Number(s.price) || 0;
-    if (s.cycle === 'yearly') return p / 12;
-    if (s.cycle === 'weekly') return p * 52 / 12;
-    return p;
+    const cur = s.currency || 'JPY';
+    const inOriginal = (s.cycle === 'yearly') ? p / 12 : (s.cycle === 'weekly') ? p * 52 / 12 : p;
+    if (cur === 'USD') {
+      if (!hasRate()) return 0;
+      return inOriginal * effectiveRate();
+    }
+    return inOriginal;
   }
   function daysUntil(dateStr) {
     if (!dateStr) return null;
@@ -864,12 +1112,27 @@
     ).join('');
     const cancelUrl = s.cancelUrl || guessCancelUrl(s.name);
     const cycleLabel = s.cycle === 'yearly' ? '年' : s.cycle === 'weekly' ? '週' : '月';
+    const cur = s.currency || 'JPY';
+    const priceVal = Number(s.price) || 0;
+    let priceLineHtml;
+    if (cur === 'USD') {
+      if (hasRate()) {
+        const jpyEquiv = priceVal * effectiveRate();
+        priceLineHtml = '<span class="amount">¥' + fmt(jpyEquiv) + '</span> / ' + cycleLabel + '額' +
+          '<span class="original">$' + priceVal.toFixed(2) + ' USD で支払い</span>';
+      } else {
+        priceLineHtml = '<span class="amount">$' + priceVal.toFixed(2) + '</span> / ' + cycleLabel + '額' +
+          '<span class="original" style="color:#a32d2d;">レート取得待ち · 円換算できません</span>';
+      }
+    } else {
+      priceLineHtml = '<span class="amount">¥' + fmt(priceVal) + '</span> / ' + cycleLabel + '額';
+    }
 
     return '' +
       '<article class="sub-card ' + cls + '">' +
         '<span class="card-cat">' + (s.category ? escape(s.category) : '\u00A0') + '</span>' +
         '<h3 class="card-name">' + escape(s.name) + '</h3>' +
-        '<p class="card-price-line"><span class="amount">¥' + fmt(s.price) + '</span> / ' + cycleLabel + '額</p>' +
+        '<p class="card-price-line">' + priceLineHtml + '</p>' +
         '<div class="card-meta">' +
           '<div class="meta-row"><span class="meta-key">次回更新</span><span class="meta-val ' + renewalClass + '">' + renewalText + '</span></div>' +
           '<div class="meta-row"><span class="meta-key">支払方法</span><span class="meta-val">' + escape(s.payment || '—') + '</span></div>' +
@@ -890,6 +1153,7 @@
     document.getElementById('form-title').textContent = item ? '編集' : '新規登録';
     document.getElementById('f-name').value = item ? item.name : '';
     document.getElementById('f-price').value = item ? item.price : '';
+    document.getElementById('f-currency').value = item ? (item.currency || 'JPY') : 'JPY';
     document.getElementById('f-cycle').value = item ? item.cycle : 'monthly';
     document.getElementById('f-renewal').value = item ? (item.renewal || '') : '';
     document.getElementById('f-category').value = item ? item.category : '動画';
@@ -924,6 +1188,7 @@
     const obj = {
       id: editingId || ('s_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)),
       name: name, price: price,
+      currency: document.getElementById('f-currency').value,
       cycle: document.getElementById('f-cycle').value,
       renewal: document.getElementById('f-renewal').value,
       category: document.getElementById('f-category').value,
@@ -1011,8 +1276,73 @@
     reader.readAsText(file);
   });
 
+  // ---------- Rate modal ----------
+  function openRateModal() {
+    refreshRateModalUI();
+    document.getElementById('rate-modal').classList.add('open');
+  }
+  function closeRateModal() {
+    document.getElementById('rate-modal').classList.remove('open');
+  }
+  function refreshRateModalUI() {
+    const errEl = document.getElementById('rate-error');
+    const updEl = document.getElementById('rate-updated');
+    const curEl = document.getElementById('rate-current');
+
+    if (hasRate()) {
+      curEl.textContent = effectiveRate().toFixed(2);
+    } else {
+      curEl.textContent = '—';
+    }
+    updEl.textContent = '取得: ' + fmtRelativeTime(rateState.fetchedAt);
+    errEl.style.display = rateState.lastError ? 'block' : 'none';
+  }
+
+  document.getElementById('btn-rate').addEventListener('click', openRateModal);
+  document.getElementById('btn-rate-close').addEventListener('click', closeRateModal);
+  document.getElementById('rate-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'rate-modal') closeRateModal();
+  });
+  document.getElementById('btn-rate-refresh').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-rate-refresh');
+    btn.textContent = '取得中…';
+    btn.disabled = true;
+    const r = await fetchRate(true);
+    btn.textContent = '最新を取得';
+    btn.disabled = false;
+    if (r) {
+      setRateChip('ok');
+    } else {
+      setRateChip('error');
+    }
+    refreshRateModalUI();
+    render();
+  });
+
+  // ---------- Init ----------
   loadData();
+  loadRate();
+
+  // Initial chip render based on cache
+  if (hasRate()) setRateChip('ok');
+  else setRateChip('loading');
   render();
+
+  // Try fetching fresh rate in background (uses cache if recent)
+  fetchRate(false).then((r) => {
+    if (r) {
+      setRateChip('ok');
+    } else {
+      setRateChip('error');
+      // Surface error if user has any USD subs and we have no rate at all
+      const hasUsdSubs = data.some(s => (s.currency || 'JPY') === 'USD');
+      if (hasUsdSubs && !hasRate()) {
+        // Auto-open modal so the user sees what's wrong
+        setTimeout(openRateModal, 300);
+      }
+    }
+    render();
+  });
 })();
 </script>
 </body>
