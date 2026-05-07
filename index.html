@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5f5f7">
+<title>Subscriptions.</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231d1d1f'/%3E%3Ctext x='50' y='68' font-size='56' font-weight='700' text-anchor='middle' fill='white' font-family='-apple-system,sans-serif'%3E%C2%A5%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #1d1d1f;
+    --graphite: #707070;
+    --slate: #474747;
+    --ash: #333333;
+    --fog: #f5f5f7;
+    --snow: #ffffff;
+    --obsidian: #000000;
+    --silver-mist: #e8e8ed;
+    --azure: #0071e3;
+    --cobalt: #0066cc;
+    --caution: #b64400;
+
+    --r-card: 28px;
+    --r-pill: 999px;
+    --r-sm: 10px;
+
+    --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+    --font-text: 'SF Pro Text', -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-text);
+    background: var(--fog);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.47;
+    letter-spacing: -0.1px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "numr";
+  }
+
+  /* ---------- Sticky sub-nav ---------- */
+  .subnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--silver-mist);
+  }
+  .subnav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .subnav-title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.004em;
+    color: var(--ink);
+  }
+  .subnav-title .dot { color: var(--azure); }
+  .subnav-actions { display: flex; gap: 8px; align-items: center; }
+  .ghost-link {
+    background: transparent;
+    border: none;
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--slate);
+    cursor: pointer;
+    padding: 6px 4px;
+    letter-spacing: -0.04px;
+    transition: color 0.2s;
+  }
+  .ghost-link:hover { color: var(--azure); }
+  .pill-cta {
+    background: var(--azure);
+    color: white;
+    border: none;
+    border-radius: var(--r-pill);
+    padding: 8px 16px;
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    letter-spacing: -0.04px;
+    transition: background 0.2s;
+  }
+  .pill-cta:hover { background: #0077ed; }
+
+  /* ---------- Page container ---------- */
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 22px 120px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 80px 0 52px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--graphite);
+    letter-spacing: -0.006em;
+    margin: 0 0 16px;
+  }
+  .hero-display {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 13vw, 96px);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+    margin: 0 0 16px;
+  }
+  .hero-display .currency {
+    font-weight: 400;
+    color: var(--graphite);
+    margin-right: 4px;
+  }
+  .hero-sub {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 3vw, 24px);
+    font-weight: 300;
+    line-height: 1.29;
+    letter-spacing: -0.36px;
+    color: var(--slate);
+    margin: 0;
+  }
+  .hero-sub strong {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* ---------- Stat strip ---------- */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 52px 0 80px;
+    background: var(--snow);
+    border-radius: var(--r-card);
+    padding: 28px;
+  }
+  .stat-cell {
+    text-align: center;
+    padding: 8px 12px;
+    border-right: 1px solid var(--silver-mist);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--graphite);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.17;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .stat-num.warn { color: var(--caution); }
+
+  @media (max-width: 640px) {
+    .stat-strip { padding: 20px 12px; }
+    .stat-cell { padding: 4px 6px; }
+    .stat-num { font-size: 28px; letter-spacing: -0.005em; }
+    .stat-label { font-size: 11px; }
+  }
+
+  /* ---------- Section ---------- */
+  .section {
+    margin-bottom: 80px;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.17;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .section-title { font-size: 32px; letter-spacing: -0.01em; }
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .toolbar input[type="search"],
+  .toolbar select {
+    height: 36px;
+    border-radius: var(--r-pill);
+    border: none;
+    background: var(--silver-mist);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: 14px;
+    padding: 0 16px;
+    letter-spacing: -0.04px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .toolbar input[type="search"] { min-width: 180px; cursor: text; }
+  .toolbar input[type="search"]::placeholder { color: var(--graphite); }
+  .toolbar select {
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23474747' stroke-width='1.5' stroke-linecap='round' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  .toolbar input[type="search"]:hover,
+  .toolbar select:hover { background: #dcdce0; }
+  .toolbar input[type="search"]:focus,
+  .toolbar select:focus { outline: 2px solid var(--azure); outline-offset: 2px; }
+  .add-btn {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: var(--r-pill);
+    height: 36px;
+    padding: 0 20px;
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: -0.04px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .add-btn:hover { background: #2d2d30; }
+  .add-btn .plus {
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 400;
+  }
+
+  /* ---------- Form ---------- */
+  .form-card {
+    background: var(--snow);
+    border-radius: var(--r-card);
+    padding: 32px;
+    margin-bottom: 28px;
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+  .form-card.open { display: block; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .form-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.36px;
+    margin: 0 0 24px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+  }
+  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  .field label {
+    display: block;
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.003em;
+    margin-bottom: 8px;
+  }
+  .field .req { color: var(--caution); margin-left: 2px; }
+  .field input, .field select {
+    width: 100%;
+    height: 44px;
+    border: 1px solid var(--silver-mist);
+    background: var(--snow);
+    color: var(--ink);
+    border-radius: var(--r-sm);
+    padding: 0 14px;
+    font-family: var(--font-text);
+    font-size: 17px;
+    letter-spacing: -0.006em;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23474747' stroke-width='1.5' stroke-linecap='round' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--azure);
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+  }
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--silver-mist);
+  }
+  .btn-primary, .btn-ghost {
+    height: 44px;
+    padding: 0 28px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: -0.006em;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--azure);
+    color: white;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: #0077ed; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-ghost:hover { color: var(--azure); }
+
+  /* ---------- Cards list ---------- */
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 540px) { .list { grid-template-columns: 1fr; } }
+
+  .sub-card {
+    background: var(--snow);
+    border-radius: var(--r-card);
+    padding: 28px;
+    transition: transform 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .sub-card:hover { transform: translateY(-2px); }
+  .sub-card.upcoming::before,
+  .sub-card.overdue::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 4px;
+  }
+  .sub-card.upcoming::before { background: var(--caution); }
+  .sub-card.overdue::before { background: var(--ink); }
+
+  .card-cat {
+    display: inline-block;
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--graphite);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    min-height: 16px;
+  }
+  .card-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin: 0 0 4px;
+    word-break: break-word;
+  }
+  .card-price-line {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--slate);
+    letter-spacing: -0.2px;
+    margin: 0 0 24px;
+  }
+  .card-price-line .amount {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--silver-mist);
+    font-size: 14px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .meta-key {
+    color: var(--graphite);
+    font-size: 14px;
+    letter-spacing: -0.04px;
+  }
+  .meta-val {
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: -0.04px;
+    text-align: right;
+  }
+  .meta-val.caution { color: var(--caution); font-weight: 500; }
+  .meta-val.danger { color: var(--ink); font-weight: 600; }
+  .stars {
+    letter-spacing: 1px;
+    color: var(--silver-mist);
+    font-size: 14px;
+  }
+  .stars .on { color: var(--ink); }
+  .card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .card-actions a, .card-actions button {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: -0.04px;
+    border: none;
+    background: transparent;
+    color: var(--cobalt);
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+  }
+  .card-actions a:hover, .card-actions button:hover { text-decoration: underline; }
+  .card-actions .sep {
+    color: var(--silver-mist);
+    user-select: none;
+  }
+  .card-actions .danger { color: var(--graphite); }
+  .card-actions .danger:hover { color: var(--caution); }
+
+  /* ---------- Empty ---------- */
+  .empty {
+    background: var(--snow);
+    border-radius: var(--r-card);
+    padding: 80px 40px;
+    text-align: center;
+    grid-column: 1 / -1;
+  }
+  .empty-display {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.07;
+    letter-spacing: -0.016em;
+    color: var(--ink);
+    margin: 0 0 16px;
+  }
+  .empty-sub {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--slate);
+    letter-spacing: -0.2px;
+    margin: 0 0 32px;
+  }
+  @media (max-width: 640px) {
+    .empty { padding: 56px 24px; }
+    .empty-display { font-size: 40px; }
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    text-align: center;
+    color: var(--graphite);
+    font-size: 12px;
+    letter-spacing: -0.003em;
+    padding-top: 40px;
+    border-top: 1px solid var(--silver-mist);
+  }
+  footer a { color: var(--cobalt); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav class="subnav">
+  <div class="subnav-inner">
+    <div class="subnav-title">Subscriptions<span class="dot">.</span></div>
+    <div class="subnav-actions">
+      <button class="ghost-link" id="btn-export">エクスポート</button>
+      <button class="ghost-link" id="btn-import">インポート</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none">
+      <button class="pill-cta" id="btn-add-nav">追加</button>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <section class="hero">
+    <p class="eyebrow">毎月の支出</p>
+    <h1 class="hero-display"><span class="currency">¥</span><span id="hero-monthly">0</span></h1>
+    <p class="hero-sub"><strong id="hero-count">0</strong> サービス · 年額換算 <strong id="hero-yearly">¥0</strong></p>
+  </section>
+
+  <div class="stat-strip" id="stat-strip">
+    <div class="stat-cell">
+      <p class="stat-label">7日以内に更新</p>
+      <p class="stat-num" id="stat-upcoming">0</p>
+    </div>
+    <div class="stat-cell">
+      <p class="stat-label">期限超過</p>
+      <p class="stat-num" id="stat-overdue">0</p>
+    </div>
+    <div class="stat-cell">
+      <p class="stat-label">未使用候補</p>
+      <p class="stat-num" id="stat-unused">0</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">All subscriptions.</h2>
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="検索">
+        <select id="filter-cat"><option value="">全カテゴリ</option></select>
+        <select id="sort">
+          <option value="renewal">更新日順</option>
+          <option value="price-desc">料金高い順</option>
+          <option value="price-asc">料金安い順</option>
+          <option value="freq-asc">利用頻度低い順</option>
+          <option value="name">名前順</option>
+        </select>
+        <button class="add-btn" id="btn-add"><span class="plus">+</span> 追加</button>
+      </div>
+    </div>
+
+    <div class="form-card" id="form-panel">
+      <h3 class="form-title" id="form-title">新規登録</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-name">サービス名<span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="Netflix">
+        </div>
+        <div class="field">
+          <label for="f-price">料金 (円)<span class="req">*</span></label>
+          <input type="number" id="f-price" min="0" step="1" placeholder="1490">
+        </div>
+        <div class="field">
+          <label for="f-cycle">請求サイクル</label>
+          <select id="f-cycle">
+            <option value="monthly">月額</option>
+            <option value="yearly">年額</option>
+            <option value="weekly">週額</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-renewal">次回更新日</label>
+          <input type="date" id="f-renewal">
+        </div>
+        <div class="field">
+          <label for="f-category">カテゴリ</label>
+          <select id="f-category">
+            <option>動画</option>
+            <option>音楽</option>
+            <option>仕事用</option>
+            <option>ゲーム</option>
+            <option>ニュース・書籍</option>
+            <option>クラウド・ストレージ</option>
+            <option>フィットネス</option>
+            <option>AI・開発</option>
+            <option>その他</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-payment">支払方法</label>
+          <select id="f-payment">
+            <option>クレジットカード</option>
+            <option>デビットカード</option>
+            <option>キャリア決済</option>
+            <option>PayPay</option>
+            <option>App Store</option>
+            <option>Google Play</option>
+            <option>銀行振替</option>
+            <option>その他</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-frequency">利用頻度</label>
+          <select id="f-frequency">
+            <option value="5">★★★★★ ほぼ毎日</option>
+            <option value="4">★★★★☆ 週数回</option>
+            <option value="3" selected>★★★☆☆ 月数回</option>
+            <option value="2">★★☆☆☆ たまに</option>
+            <option value="1">★☆☆☆☆ ほぼ未使用</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-cancel">解約ページURL (任意)</label>
+          <input type="url" id="f-cancel" placeholder="https://...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="btn-save">保存</button>
+        <button class="btn-ghost" id="btn-cancel">キャンセル</button>
+      </div>
+    </div>
+
+    <div class="list" id="list"></div>
+  </section>
+
+  <footer>
+    データはこのブラウザのみに保存されます · 別端末で使う場合はエクスポート / インポートで移行してください
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  const STORAGE_KEY = 'subscription_manager_v1';
+  const KNOWN_CANCEL_URLS = {
+    'netflix': 'https://www.netflix.com/cancelplan',
+    'spotify': 'https://www.spotify.com/account/subscription/',
+    'youtube premium': 'https://www.youtube.com/paid_memberships',
+    'youtube music': 'https://www.youtube.com/paid_memberships',
+    'youtube': 'https://www.youtube.com/paid_memberships',
+    'amazon prime': 'https://www.amazon.co.jp/gp/primecentral',
+    'prime video': 'https://www.amazon.co.jp/gp/primecentral',
+    'amazon': 'https://www.amazon.co.jp/gp/primecentral',
+    'disney+': 'https://www.disneyplus.com/account/subscription',
+    'disney plus': 'https://www.disneyplus.com/account/subscription',
+    'disney': 'https://www.disneyplus.com/account/subscription',
+    'apple music': 'https://music.apple.com/account/subscriptions',
+    'apple tv': 'https://tv.apple.com/account/subscriptions',
+    'apple one': 'https://music.apple.com/account/subscriptions',
+    'icloud': 'https://support.apple.com/ja-jp/HT207583',
+    'adobe': 'https://account.adobe.com/plans',
+    'creative cloud': 'https://account.adobe.com/plans',
+    'microsoft 365': 'https://account.microsoft.com/services',
+    'office 365': 'https://account.microsoft.com/services',
+    'dropbox': 'https://www.dropbox.com/account/plan',
+    'github': 'https://github.com/settings/billing',
+    'chatgpt': 'https://chat.openai.com/#settings/Subscription',
+    'openai': 'https://platform.openai.com/account/billing',
+    'claude': 'https://claude.ai/settings/billing',
+    'anthropic': 'https://claude.ai/settings/billing',
+    'dazn': 'https://www.dazn.com/account/subscription',
+    'hulu': 'https://www.hulu.jp/account',
+    'u-next': 'https://video.unext.jp/account/subscription',
+    'unext': 'https://video.unext.jp/account/subscription',
+    'abema': 'https://abema.tv/about/premium',
+    'nintendo': 'https://accounts.nintendo.com/',
+    'playstation': 'https://www.playstation.com/account/',
+    'xbox': 'https://account.microsoft.com/services',
+    'paramount': 'https://www.paramountplus.com/account/',
+    'evernote': 'https://www.evernote.com/Settings.action',
+    'notion': 'https://www.notion.so/my-account',
+    'figma': 'https://www.figma.com/settings',
+    'canva': 'https://www.canva.com/settings/billing-and-plans',
+    'zoom': 'https://zoom.us/billing',
+    'slack': 'https://slack.com/account/billing',
+    'kindle unlimited': 'https://www.amazon.co.jp/kindle-dbs/hz/subscribe/ku/manage',
+    'audible': 'https://www.audible.co.jp/account/membership',
+    'nhk': 'https://pid.nhk.or.jp/jushinryo/'
+  };
+
+  let data = [];
+  let editingId = null;
+
+  // ---------- Storage ----------
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      data = raw ? JSON.parse(raw) : [];
+    } catch (e) { console.error('Load failed:', e); data = []; }
+  }
+  function saveData() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    catch (e) { alert('保存に失敗しました: ' + e.message); }
+  }
+
+  // ---------- Helpers ----------
+  function fmt(n) { return Math.round(n).toLocaleString('ja-JP'); }
+  function escape(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+    ));
+  }
+  function monthly(s) {
+    const p = Number(s.price) || 0;
+    if (s.cycle === 'yearly') return p / 12;
+    if (s.cycle === 'weekly') return p * 52 / 12;
+    return p;
+  }
+  function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    return Math.round((d - today) / 86400000);
+  }
+  function guessCancelUrl(name) {
+    const k = (name || '').toLowerCase().trim();
+    if (!k) return null;
+    const keys = Object.keys(KNOWN_CANCEL_URLS).sort((a,b) => b.length - a.length);
+    for (const key of keys) { if (k.includes(key)) return KNOWN_CANCEL_URLS[key]; }
+    return null;
+  }
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  // ---------- Render ----------
+  function render() {
+    const search = document.getElementById('search').value.toLowerCase().trim();
+    const cat = document.getElementById('filter-cat').value;
+    const sort = document.getElementById('sort').value;
+
+    const catSel = document.getElementById('filter-cat');
+    const cats = Array.from(new Set(data.map(d => d.category).filter(Boolean))).sort();
+    const cur = catSel.value;
+    catSel.innerHTML = '<option value="">全カテゴリ</option>' +
+      cats.map(c => '<option' + (c === cur ? ' selected' : '') + '>' + escape(c) + '</option>').join('');
+
+    const monthlyTotal = data.reduce((a, s) => a + monthly(s), 0);
+    document.getElementById('hero-monthly').textContent = fmt(monthlyTotal);
+    document.getElementById('hero-yearly').textContent = '¥' + fmt(monthlyTotal * 12);
+    document.getElementById('hero-count').textContent = data.length;
+
+    const upcomingCount = data.filter(s => {
+      const d = daysUntil(s.renewal);
+      return d !== null && d >= 0 && d <= 7;
+    }).length;
+    const overdueCount = data.filter(s => {
+      const d = daysUntil(s.renewal);
+      return d !== null && d < 0;
+    }).length;
+    const unusedCount = data.filter(s => Number(s.frequency) <= 2).length;
+
+    const upEl = document.getElementById('stat-upcoming');
+    upEl.textContent = upcomingCount;
+    upEl.classList.toggle('warn', upcomingCount > 0);
+    const odEl = document.getElementById('stat-overdue');
+    odEl.textContent = overdueCount;
+    odEl.classList.toggle('warn', overdueCount > 0);
+    const unEl = document.getElementById('stat-unused');
+    unEl.textContent = unusedCount;
+    unEl.classList.toggle('warn', unusedCount > 0);
+
+    let list = data.filter(s => {
+      if (search && !s.name.toLowerCase().includes(search)) return false;
+      if (cat && s.category !== cat) return false;
+      return true;
+    });
+    list.sort((a, b) => {
+      if (sort === 'price-desc') return monthly(b) - monthly(a);
+      if (sort === 'price-asc') return monthly(a) - monthly(b);
+      if (sort === 'freq-asc') return (Number(a.frequency) || 0) - (Number(b.frequency) || 0);
+      if (sort === 'name') return a.name.localeCompare(b.name, 'ja');
+      const da = daysUntil(a.renewal);
+      const db = daysUntil(b.renewal);
+      if (da === null && db === null) return 0;
+      if (da === null) return 1;
+      if (db === null) return -1;
+      return da - db;
+    });
+
+    const wrap = document.getElementById('list');
+    if (list.length === 0) {
+      const isEmpty = data.length === 0;
+      wrap.innerHTML = '<div class="empty">' +
+        '<h3 class="empty-display">' + (isEmpty ? 'Start fresh.' : 'No matches.') + '</h3>' +
+        '<p class="empty-sub">' + (isEmpty
+          ? '最初のサブスクリプションを登録しましょう。'
+          : '検索条件を変えてみてください。') + '</p>' +
+        (isEmpty ? '<button class="btn-primary" id="empty-add">最初の1件を追加</button>' : '') +
+        '</div>';
+      const ea = document.getElementById('empty-add');
+      if (ea) ea.addEventListener('click', () => document.getElementById('btn-add').click());
+      return;
+    }
+    wrap.innerHTML = list.map(cardHtml).join('');
+  }
+
+  function cardHtml(s) {
+    const days = daysUntil(s.renewal);
+    let cls = '';
+    let renewalText = '更新日未設定';
+    let renewalClass = '';
+    if (s.renewal) {
+      renewalText = s.renewal;
+      if (days !== null) {
+        if (days < 0) {
+          renewalText = (-days) + '日 超過';
+          renewalClass = 'danger';
+          cls = 'overdue';
+        } else if (days === 0) {
+          renewalText = '本日更新';
+          renewalClass = 'caution';
+          cls = 'upcoming';
+        } else if (days <= 7) {
+          renewalText = s.renewal + ' (あと' + days + '日)';
+          renewalClass = 'caution';
+          cls = 'upcoming';
+        } else {
+          renewalText = s.renewal + ' (あと' + days + '日)';
+        }
+      }
+    }
+    const freq = Number(s.frequency) || 0;
+    const stars = Array.from({length:5}, (_,i) =>
+      '<span class="' + (i < freq ? 'on' : '') + '">★</span>'
+    ).join('');
+    const cancelUrl = s.cancelUrl || guessCancelUrl(s.name);
+    const cycleLabel = s.cycle === 'yearly' ? '年' : s.cycle === 'weekly' ? '週' : '月';
+
+    return '' +
+      '<article class="sub-card ' + cls + '">' +
+        '<span class="card-cat">' + (s.category ? escape(s.category) : '\u00A0') + '</span>' +
+        '<h3 class="card-name">' + escape(s.name) + '</h3>' +
+        '<p class="card-price-line"><span class="amount">¥' + fmt(s.price) + '</span> / ' + cycleLabel + '額</p>' +
+        '<div class="card-meta">' +
+          '<div class="meta-row"><span class="meta-key">次回更新</span><span class="meta-val ' + renewalClass + '">' + renewalText + '</span></div>' +
+          '<div class="meta-row"><span class="meta-key">支払方法</span><span class="meta-val">' + escape(s.payment || '—') + '</span></div>' +
+          '<div class="meta-row"><span class="meta-key">利用頻度</span><span class="meta-val stars">' + stars + '</span></div>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          (cancelUrl ? '<a href="' + escape(cancelUrl) + '" target="_blank" rel="noopener">解約ページ ↗</a><span class="sep">·</span>' : '') +
+          '<button data-edit="' + s.id + '">編集</button>' +
+          (s.renewal ? '<span class="sep">·</span><button data-renew="' + s.id + '">更新を進める</button>' : '') +
+          '<span class="sep">·</span><button class="danger" data-del="' + s.id + '">削除</button>' +
+        '</div>' +
+      '</article>';
+  }
+
+  // ---------- Form ----------
+  function openForm(item) {
+    editingId = item ? item.id : null;
+    document.getElementById('form-title').textContent = item ? '編集' : '新規登録';
+    document.getElementById('f-name').value = item ? item.name : '';
+    document.getElementById('f-price').value = item ? item.price : '';
+    document.getElementById('f-cycle').value = item ? item.cycle : 'monthly';
+    document.getElementById('f-renewal').value = item ? (item.renewal || '') : '';
+    document.getElementById('f-category').value = item ? item.category : '動画';
+    document.getElementById('f-payment').value = item ? item.payment : 'クレジットカード';
+    document.getElementById('f-frequency').value = item ? String(item.frequency) : '3';
+    document.getElementById('f-cancel').value = item ? (item.cancelUrl || '') : '';
+    document.getElementById('form-panel').classList.add('open');
+    setTimeout(() => document.getElementById('f-name').focus(), 100);
+  }
+  function closeForm() {
+    editingId = null;
+    document.getElementById('form-panel').classList.remove('open');
+  }
+
+  // ---------- Events ----------
+  function handleAdd() {
+    const panel = document.getElementById('form-panel');
+    if (panel.classList.contains('open') && editingId === null) closeForm();
+    else openForm(null);
+  }
+  document.getElementById('btn-add').addEventListener('click', handleAdd);
+  document.getElementById('btn-add-nav').addEventListener('click', () => {
+    openForm(null);
+    document.getElementById('form-panel').scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  document.getElementById('btn-cancel').addEventListener('click', closeForm);
+  document.getElementById('btn-save').addEventListener('click', () => {
+    const name = document.getElementById('f-name').value.trim();
+    const price = Number(document.getElementById('f-price').value);
+    if (!name) { alert('サービス名を入力してください'); return; }
+    if (isNaN(price) || price < 0) { alert('正しい料金を入力してください'); return; }
+    const obj = {
+      id: editingId || ('s_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)),
+      name: name, price: price,
+      cycle: document.getElementById('f-cycle').value,
+      renewal: document.getElementById('f-renewal').value,
+      category: document.getElementById('f-category').value,
+      payment: document.getElementById('f-payment').value,
+      frequency: document.getElementById('f-frequency').value,
+      cancelUrl: document.getElementById('f-cancel').value.trim()
+    };
+    if (editingId) data = data.map(d => d.id === editingId ? obj : d);
+    else data.push(obj);
+    saveData();
+    closeForm();
+    render();
+  });
+
+  document.getElementById('list').addEventListener('click', (e) => {
+    const ed = e.target.closest('[data-edit]');
+    const dl = e.target.closest('[data-del]');
+    const rn = e.target.closest('[data-renew]');
+    if (ed) {
+      const item = data.find(d => d.id === ed.dataset.edit);
+      if (item) {
+        openForm(item);
+        document.getElementById('form-panel').scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    } else if (dl) {
+      const item = data.find(d => d.id === dl.dataset.del);
+      if (item && confirm('「' + item.name + '」を削除しますか？')) {
+        data = data.filter(d => d.id !== dl.dataset.del);
+        saveData(); render();
+      }
+    } else if (rn) {
+      const item = data.find(d => d.id === rn.dataset.renew);
+      if (item && item.renewal) {
+        const d = new Date(item.renewal);
+        if (item.cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
+        else if (item.cycle === 'weekly') d.setDate(d.getDate() + 7);
+        else d.setMonth(d.getMonth() + 1);
+        item.renewal = d.toISOString().slice(0, 10);
+        saveData(); render();
+      }
+    }
+  });
+
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('filter-cat').addEventListener('change', render);
+  document.getElementById('sort').addEventListener('change', render);
+
+  document.getElementById('btn-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'subscriptions-' + todayStr() + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById('btn-import').addEventListener('click', () => {
+    document.getElementById('import-file').click();
+  });
+  document.getElementById('import-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!Array.isArray(imported)) throw new Error('配列ではありません');
+        const append = confirm(
+          imported.length + '件読み込みました。\n[OK] 既存データに追加 / [キャンセル] 全置換'
+        );
+        if (append) {
+          const existing = new Set(data.map(d => d.id));
+          imported.forEach(it => {
+            if (!it.id) it.id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+            if (!existing.has(it.id)) data.push(it);
+          });
+        } else { data = imported; }
+        saveData(); render();
+        alert('インポートしました');
+      } catch (err) {
+        alert('インポート失敗: ' + err.message);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  loadData();
+  render();
+})();
+</script>
+</body>
+</html>
