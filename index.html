@@ -221,6 +221,132 @@
     .stat-label { font-size: 11px; }
   }
 
+  /* ---------- Category breakdown ---------- */
+  .breakdown {
+    background: var(--snow);
+    border-radius: var(--r-card);
+    padding: 36px 32px;
+    margin-bottom: 80px;
+  }
+  .breakdown-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .breakdown-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .breakdown-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--fog);
+    border-radius: var(--r-pill);
+    padding: 3px;
+  }
+  .breakdown-toggle button {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--slate);
+    cursor: pointer;
+    letter-spacing: -0.04px;
+    transition: all 0.15s;
+  }
+  .breakdown-toggle button.active {
+    background: var(--snow);
+    color: var(--ink);
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 16px;
+    row-gap: 6px;
+    align-items: baseline;
+  }
+  .bar-label {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.04px;
+  }
+  .bar-label .count {
+    color: var(--graphite);
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 6px;
+  }
+  .bar-value {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.006em;
+    text-align: right;
+  }
+  .bar-value .pct {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--graphite);
+    margin-left: 6px;
+  }
+  .bar-track {
+    grid-column: 1 / -1;
+    height: 10px;
+    background: var(--fog);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: var(--r-pill);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* Distinct shades for each category — derived from ink, no hue confusion */
+  .bar-fill.cat-0 { background: #1d1d1f; }
+  .bar-fill.cat-1 { background: #0071e3; }
+  .bar-fill.cat-2 { background: #4a4a4c; }
+  .bar-fill.cat-3 { background: #5fa3e8; }
+  .bar-fill.cat-4 { background: #6e6e72; }
+  .bar-fill.cat-5 { background: #b64400; }
+  .bar-fill.cat-6 { background: #8e8e93; }
+  .bar-fill.cat-7 { background: #00a854; }
+  .bar-fill.cat-8 { background: #aeaeb2; }
+  .bar-fill.cat-9 { background: #d4d4d9; }
+
+  .breakdown-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--graphite);
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .breakdown { padding: 28px 20px; }
+    .breakdown-title { font-size: 22px; }
+  }
+
   /* ---------- Section ---------- */
   .section {
     margin-bottom: 80px;
@@ -529,23 +655,33 @@
   }
   .card-price-line {
     font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 300;
-    color: var(--slate);
-    letter-spacing: -0.2px;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.018em;
+    line-height: 1.05;
     margin: 0 0 24px;
   }
   .card-price-line .amount {
-    font-weight: 500;
+    font-weight: 700;
     color: var(--ink);
+  }
+  .card-price-line .cycle-suffix {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--graphite);
+    letter-spacing: -0.006em;
+    margin-left: 6px;
+    white-space: nowrap;
   }
   .card-price-line .original {
     display: block;
+    font-family: var(--font-text);
     font-size: 13px;
     font-weight: 400;
     color: var(--graphite);
     letter-spacing: -0.003em;
-    margin-top: 2px;
+    margin-top: 8px;
   }
   .card-meta {
     display: flex;
@@ -690,6 +826,17 @@
       <p class="stat-num" id="stat-unused">0</p>
     </div>
   </div>
+
+  <section class="breakdown" id="breakdown-section">
+    <div class="breakdown-head">
+      <h2 class="breakdown-title">分野別の支出</h2>
+      <div class="breakdown-toggle" role="tablist">
+        <button id="bd-monthly" class="active" type="button">月額</button>
+        <button id="bd-yearly" type="button">年額</button>
+      </div>
+    </div>
+    <div id="bar-list" class="bar-list"></div>
+  </section>
 
   <section class="section">
     <div class="section-head">
@@ -1009,6 +1156,53 @@
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
+  // ---------- Breakdown chart ----------
+  let breakdownMode = 'monthly'; // or 'yearly'
+
+  function renderBreakdown() {
+    const wrap = document.getElementById('bar-list');
+    if (data.length === 0) {
+      wrap.innerHTML = '<div class="breakdown-empty">サブスクを登録すると、分野別の支出がここに表示されます。</div>';
+      return;
+    }
+
+    // Aggregate JPY-equivalent monthly amount by category
+    const buckets = {};
+    data.forEach(s => {
+      const c = s.category || '未分類';
+      if (!buckets[c]) buckets[c] = { total: 0, count: 0 };
+      buckets[c].total += monthly(s);
+      buckets[c].count += 1;
+    });
+
+    const rows = Object.keys(buckets).map(k => ({
+      cat: k,
+      monthly: buckets[k].total,
+      yearly: buckets[k].total * 12,
+      count: buckets[k].count
+    })).sort((a, b) => b.monthly - a.monthly);
+
+    const max = rows.length > 0 ? rows[0].monthly : 0;
+    const grandTotal = rows.reduce((a, r) => a + r.monthly, 0);
+
+    if (max === 0) {
+      wrap.innerHTML = '<div class="breakdown-empty">金額のあるサブスクがまだありません。</div>';
+      return;
+    }
+
+    wrap.innerHTML = rows.map((r, i) => {
+      const value = breakdownMode === 'yearly' ? r.yearly : r.monthly;
+      const pct = grandTotal > 0 ? (r.monthly / grandTotal * 100) : 0;
+      const widthPct = max > 0 ? (r.monthly / max * 100) : 0;
+      return '' +
+        '<div class="bar-row">' +
+          '<span class="bar-label">' + escape(r.cat) + '<span class="count">' + r.count + '件</span></span>' +
+          '<span class="bar-value">¥' + fmt(value) + '<span class="pct">' + pct.toFixed(1) + '%</span></span>' +
+          '<div class="bar-track"><div class="bar-fill cat-' + (i % 10) + '" style="width:' + widthPct.toFixed(1) + '%"></div></div>' +
+        '</div>';
+    }).join('');
+  }
+
   // ---------- Render ----------
   function render() {
     const search = document.getElementById('search').value.toLowerCase().trim();
@@ -1045,6 +1239,9 @@
     const unEl = document.getElementById('stat-unused');
     unEl.textContent = unusedCount;
     unEl.classList.toggle('warn', unusedCount > 0);
+
+    // Update category breakdown chart
+    renderBreakdown();
 
     let list = data.filter(s => {
       if (search && !s.name.toLowerCase().includes(search)) return false;
@@ -1118,14 +1315,14 @@
     if (cur === 'USD') {
       if (hasRate()) {
         const jpyEquiv = priceVal * effectiveRate();
-        priceLineHtml = '<span class="amount">¥' + fmt(jpyEquiv) + '</span> / ' + cycleLabel + '額' +
+        priceLineHtml = '<span class="amount">¥' + fmt(jpyEquiv) + '</span><span class="cycle-suffix">/ ' + cycleLabel + '額</span>' +
           '<span class="original">$' + priceVal.toFixed(2) + ' USD で支払い</span>';
       } else {
-        priceLineHtml = '<span class="amount">$' + priceVal.toFixed(2) + '</span> / ' + cycleLabel + '額' +
+        priceLineHtml = '<span class="amount">$' + priceVal.toFixed(2) + '</span><span class="cycle-suffix">/ ' + cycleLabel + '額</span>' +
           '<span class="original" style="color:#a32d2d;">レート取得待ち · 円換算できません</span>';
       }
     } else {
-      priceLineHtml = '<span class="amount">¥' + fmt(priceVal) + '</span> / ' + cycleLabel + '額';
+      priceLineHtml = '<span class="amount">¥' + fmt(priceVal) + '</span><span class="cycle-suffix">/ ' + cycleLabel + '額</span>';
     }
 
     return '' +
@@ -1235,6 +1432,20 @@
   document.getElementById('search').addEventListener('input', render);
   document.getElementById('filter-cat').addEventListener('change', render);
   document.getElementById('sort').addEventListener('change', render);
+
+  // Breakdown chart mode toggle
+  document.getElementById('bd-monthly').addEventListener('click', () => {
+    breakdownMode = 'monthly';
+    document.getElementById('bd-monthly').classList.add('active');
+    document.getElementById('bd-yearly').classList.remove('active');
+    renderBreakdown();
+  });
+  document.getElementById('bd-yearly').addEventListener('click', () => {
+    breakdownMode = 'yearly';
+    document.getElementById('bd-yearly').classList.add('active');
+    document.getElementById('bd-monthly').classList.remove('active');
+    renderBreakdown();
+  });
 
   document.getElementById('btn-export').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
